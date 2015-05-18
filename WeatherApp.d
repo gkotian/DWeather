@@ -41,22 +41,57 @@ public class WeatherApp
                 break;
             }
 
-            auto weather_url = this.weather_url_stem ~ city;
-            // writeln("URL: " ~ weather_url);
+            import std.datetime;
+            auto now_sec = stdTimeToUnixTime(Clock.currStdTime());
+            writeln(now_sec);
 
-            import std.net.curl;
-            auto content = get(weather_url);
+            bool query_needed;
+            bool new_weather_info_obj_needed;
 
-            writeln("Raw json: " ~ content);
+            auto p = city in all_weather_infos;
 
-            import std.json;
-            auto parsed_json = parseJSON(content);
+            if (p is null)
+            {
+                query_needed = true;
+                new_weather_info_obj_needed = true;
+            }
+            else if (p.isInfoStale())
+            {
+                query_needed = true;
+            }
 
-            auto weather_info = new WeatherInfo();
+            if (query_needed)
+            {
+                auto weather_url = this.weather_url_stem ~ city;
+                // writeln("URL: " ~ weather_url);
 
-            weather_info.initFromJSON(parsed_json);
+                import std.net.curl;
+                auto content = get(weather_url);
 
-            weather_info.showWeatherInfo();
+                writeln("Raw json: " ~ content);
+
+                import std.json;
+                auto parsed_json = parseJSON(content);
+
+                if (parsed_json["cod"].integer != 200)
+                {
+                    writeln("Error");
+                    continue;
+                }
+
+                if (new_weather_info_obj_needed)
+                {
+                    auto weather_info = new WeatherInfo();
+
+                    all_weather_infos[city] = *weather_info;
+
+                    p = city in all_weather_infos;
+                }
+
+                p.initFromJSON(parsed_json);
+            }
+
+            p.showWeatherInfo();
         }
     }
 }

@@ -7,6 +7,11 @@ import core.stdc.time;
 
 public struct WeatherInfo
 {
+    /* The time when this weather information was last queried.
+     * (the timestamp present in the response (in the "dt" field) doesn't seem to quite match the
+     * last query time). */
+    private time_t last_query_time;
+
     /* Coordinates of the city. */
     private struct Coordinates
     {
@@ -73,11 +78,20 @@ public struct WeatherInfo
     /* Precipitation volume for the last 3 hours (in millimetres). */
     private double rain;
 
-    /* Timestamp of query. */
-    private time_t query_time;
+    /* Timestamp in query response. */
+    private time_t query_timestamp;
 
     /* Status of query. */
     private int query_status_code;
+
+    /* Returns true if this weather information is more than 10 minutes old. */
+    public bool isInfoStale ()
+    {
+        import std.datetime;
+        auto now_sec = stdTimeToUnixTime(Clock.currStdTime());
+
+        return (this.last_query_time < (now_sec - (10 * 60)));
+    }
 
     /* Prints the current weather information. */
     public void showWeatherInfo ()
@@ -112,8 +126,11 @@ public struct WeatherInfo
         // this.humidity = json["main"]["humidity"].integer;
         // this.cloudiness = json["clouds"]["all"].integer;
         this.rain = json["rain"]["3h"].floating;
-        this.query_time = json["dt"].integer;
+        this.query_timestamp = json["dt"].integer;
         // this.query_status_code = json["cod"].integer;
+
+        import std.datetime;
+        this.last_query_time = stdTimeToUnixTime(Clock.currStdTime());
     }
 }
 
