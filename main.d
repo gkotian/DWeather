@@ -1,16 +1,15 @@
 /* Usage:
- *     $> gdc main.d WeatherApp.d -nophoboslib -lgphobos2 -lcurl && ./a.out
+ *     $> gdc main.d WeatherApp.d WeatherInfo.d -nophoboslib -lgphobos2 -lcurl && ./a.out
  */
-
-// ip.jsontest.com
-// http://getcitydetails.geobytes.com/GetCityDetails?fqcn=217.186.53.81
 
 module main;
 
+/* Imports. */
 import WeatherApp;
 
 
-int main()
+/* Main function. */
+int main ()
 {
     auto weather_app = new WeatherApp();
 
