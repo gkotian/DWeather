@@ -37,7 +37,7 @@ public struct WeatherInfo
     private Wind wind;
 
     /* ID of the city. */
-    private int city_id;
+    private long city_id;
 
     /* Name of the city. */
     private string city_name;
@@ -70,10 +70,10 @@ public struct WeatherInfo
     private double pressure;
 
     /* Humidity (in %). */
-    private int humidity;
+    private long humidity;
 
     /* Cloudiness (in %). */
-    private int cloudiness;
+    private long cloudiness;
 
     /* Precipitation volume for the last 3 hours (in millimetres). */
     private double rain;
@@ -82,7 +82,7 @@ public struct WeatherInfo
     private time_t query_timestamp;
 
     /* Status of query. */
-    private int query_status_code;
+    private long query_status_code;
 
     /* Returns true if this weather information is more than 10 minutes old. */
     public bool isInfoStale ()
@@ -112,7 +112,7 @@ public struct WeatherInfo
         this.coordinates.longitude = json["coord"]["lon"].floating;
         this.wind.speed = json["wind"]["speed"].floating;
         this.wind.degrees = json["wind"]["deg"].floating;
-        // this.city_id = json["id"].floating;
+        this.city_id = json["id"].integer;
         this.city_name = json["name"].str;
         this.country_code = json["sys"]["country"].str;
         this.sunrise = json["sys"]["sunrise"].integer;
@@ -123,11 +123,16 @@ public struct WeatherInfo
         this.temp_max = json["main"]["temp_max"].floating - 273.15;
         this.temp_min = json["main"]["temp_min"].floating - 273.15;
         this.pressure = json["main"]["pressure"].floating;
-        // this.humidity = json["main"]["humidity"].integer;
-        // this.cloudiness = json["clouds"]["all"].integer;
-        this.rain = json["rain"]["3h"].floating;
+        this.humidity = json["main"]["humidity"].integer;
+        this.cloudiness = json["clouds"]["all"].integer;
+
+        if ( this.weather_short_desc == "Rain" )
+        {
+            this.rain = json["rain"]["3h"].floating;
+        }
+
         this.query_timestamp = json["dt"].integer;
-        // this.query_status_code = json["cod"].integer;
+        this.query_status_code = json["cod"].integer;
 
         import std.datetime;
         this.last_query_time = stdTimeToUnixTime(Clock.currStdTime());

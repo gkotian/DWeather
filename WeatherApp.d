@@ -1,6 +1,9 @@
 module WeatherApp;
 
 /* Imports. */
+import std.json;
+import std.net.curl;
+import std.stdio;
 import WeatherInfo;
 
 
@@ -34,19 +37,31 @@ public class WeatherApp
 
         this.getCityName(public_ip_addr, city);
 
-        import std.stdio;
-        writeln("IP address = " ~ public_ip_addr);
-        writeln("city       = " ~ city);
-return;
+        JSONValue weather_json;
+
+        if (!this.getWeatherDetails(city, weather_json))
+        {
+            writeln("Failed to get weather information for '" ~ city ~ "'.");
+        }
+        else
+        {
+            WeatherInfo weather_info;
+
+            weather_info.initFromJSON(weather_json);
+
+            this.all_weather_infos[city] = weather_info;
+
+            weather_info.showWeatherInfo();
+        }
 
         while (1)
         {
-            import std.stdio;
             write("Enter a city ('q' to quit): ");
 
             city = readln();
 
-            city = city[0 .. $-1];
+            import std.uni;
+            city = toLower(city[0 .. $-1]);
 
             if (city == "q")
             {
@@ -55,52 +70,27 @@ return;
 
             import std.datetime;
             auto now_sec = stdTimeToUnixTime(Clock.currStdTime());
-            writeln(now_sec);
-
-            bool query_needed;
-            bool new_weather_info_obj_needed;
 
             auto p = city in all_weather_infos;
 
-            if (p is null)
+            if (p is null || p.isInfoStale())
             {
-                query_needed = true;
-                new_weather_info_obj_needed = true;
-            }
-            else if (p.isInfoStale())
-            {
-                query_needed = true;
-            }
-
-            if (query_needed)
-            {
-                auto weather_url = this.weather_url_stem ~ city;
-                // writeln("URL: " ~ weather_url);
-
-                import std.net.curl;
-                auto content = get(weather_url);
-
-                writeln("Raw json: " ~ content);
-
-                import std.json;
-                auto parsed_json = parseJSON(content);
-
-                if (parsed_json["cod"].integer != 200)
+                if (!this.getWeatherDetails(city, weather_json))
                 {
-                    writeln("Error");
+                    writeln("Failed to get weather information for '" ~ city ~ "'.");
                     continue;
                 }
 
-                if (new_weather_info_obj_needed)
+                if (p is null)
                 {
-                    auto weather_info = new WeatherInfo();
+                    WeatherInfo weather_info;
 
-                    all_weather_infos[city] = *weather_info;
+                    this.all_weather_infos[city] = weather_info;
 
                     p = city in all_weather_infos;
                 }
 
-                p.initFromJSON(parsed_json);
+                p.initFromJSON(weather_json);
             }
 
             p.showWeatherInfo();
@@ -109,10 +99,8 @@ return;
 
     private void getPublicIpAddress (out string public_ip_addr)
     {
-        import std.net.curl;
         auto content = get(this.ip_address_url);
 
-        import std.json;
         auto parsed_json = parseJSON(content);
 
         public_ip_addr = parsed_json["ip"].str;
@@ -120,14 +108,24 @@ return;
 
     private void getCityName (string public_ip_addr, out string city_name)
     {
-        import std.net.curl;
         auto city_name_url = this.city_name_url_stem ~ public_ip_addr;
         auto content = get(city_name_url);
 
-        import std.json;
         auto parsed_json = parseJSON(content);
 
-        city_name = parsed_json["geobytescity"].str;
+        import std.uni;
+        city_name = toLower(parsed_json["geobytescity"].str);
+    }
+
+    private bool getWeatherDetails (string city_name, out JSONValue weather_json)
+    {
+        auto weather_url = this.weather_url_stem ~ city_name;
+
+        auto content = get(weather_url);
+
+        weather_json = parseJSON(content);
+
+        return (weather_json["cod"].integer == 200);
     }
 }
 
