@@ -8,7 +8,8 @@ import WeatherInfo;
 public class WeatherApp
 {
     /* URL used to get the public IP address of the user's system. */
-    private const ip_address_url = "http://ip.jsontest.com";
+    // private const ip_address_url = "http://ip.jsontest.com";
+    private const ip_address_url = "https://api.ipify.org/?format=json";
 
     /* Stem of the URL used to retrieve the name of the user's current city. The public IP address
      * of the user's system needs to be appended to it to form the full required URL. */
@@ -25,7 +26,18 @@ public class WeatherApp
     /* The main function that starts the weather application operations. */
     public void run ()
     {
+        string public_ip_addr;
+
+        this.getPublicIpAddress(public_ip_addr);
+
         string city;
+
+        this.getCityName(public_ip_addr, city);
+
+        import std.stdio;
+        writeln("IP address = " ~ public_ip_addr);
+        writeln("city       = " ~ city);
+return;
 
         while (1)
         {
@@ -93,6 +105,29 @@ public class WeatherApp
 
             p.showWeatherInfo();
         }
+    }
+
+    private void getPublicIpAddress (out string public_ip_addr)
+    {
+        import std.net.curl;
+        auto content = get(this.ip_address_url);
+
+        import std.json;
+        auto parsed_json = parseJSON(content);
+
+        public_ip_addr = parsed_json["ip"].str;
+    }
+
+    private void getCityName (string public_ip_addr, out string city_name)
+    {
+        import std.net.curl;
+        auto city_name_url = this.city_name_url_stem ~ public_ip_addr;
+        auto content = get(city_name_url);
+
+        import std.json;
+        auto parsed_json = parseJSON(content);
+
+        city_name = parsed_json["geobytescity"].str;
     }
 }
 
