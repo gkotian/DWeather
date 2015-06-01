@@ -67,7 +67,7 @@ public struct WeatherInfo
     private double temp_min;
 
     /* Atmospheric pressure (in hPa). */
-    private double pressure;
+    private long pressure;
 
     /* Humidity (in %). */
     private long humidity;
@@ -98,11 +98,31 @@ public struct WeatherInfo
     {
         import std.conv;
         import std.stdio;
+        import std.string;
 
-        writeln(this.city_name ~ ", " ~ this.country_code ~ " (" ~ to!string(this.city_id) ~ ")");
-        writeln("    " ~ this.weather_short_desc ~ " (" ~ this.weather_long_desc ~ ")");
-        writeln("    current temperature : " ~ to!string(this.temp_cur) ~ " (min " ~
-                to!string(this.temp_min) ~ ", max " ~ to!string(this.temp_max) ~ ")");
+        // writeln(this.city_name ~ ", " ~ this.country_code ~ " (" ~ to!string(this.city_id) ~ ")");
+        // writeln("    " ~ this.weather_short_desc ~ " (" ~ this.weather_long_desc ~ ")");
+        // writeln("    current temperature : " ~ to!string(this.temp_cur) ~ " (min " ~
+        //         to!string(this.temp_min) ~ ", max " ~ to!string(this.temp_max) ~ ")");
+
+        auto city_and_country = this.city_name ~ ", " ~ this.country_code;
+
+        writefln("    +-----------------------------------------+");
+        writefln("    |%s|", center(city_and_country, 41));
+        writefln("    +-----------------------------------------+");
+        writefln("    |  weather      |  %s|", leftJustify(this.weather_short_desc, 23));
+        writefln("    +-----------------------------------------+");
+        writefln("    |  temperature  |  %.2f°C                |", this.temp_cur);
+        writefln("    +-----------------------------------------+");
+        writefln("    |  pressure     |  %d hPa               |", this.pressure);
+        writefln("    +-----------------------------------------+");
+        writefln("    |  humidity     |  %d%%                    |", this.humidity);
+        writefln("    +-----------------------------------------+");
+        writefln("    |  sunrise      |  %d             |", this.sunrise);
+        writefln("    +-----------------------------------------+");
+        writefln("    |  sunset       |  %d             |", this.sunset);
+        writefln("    +-----------------------------------------+");
+        writefln("");
     }
 
     import std.json;
@@ -122,7 +142,7 @@ public struct WeatherInfo
         this.temp_cur = json["main"]["temp"].floating - 273.15;
         this.temp_max = json["main"]["temp_max"].floating - 273.15;
         this.temp_min = json["main"]["temp_min"].floating - 273.15;
-        this.pressure = json["main"]["pressure"].floating;
+        this.pressure = json["main"]["pressure"].integer;
         this.humidity = json["main"]["humidity"].integer;
         this.cloudiness = json["clouds"]["all"].integer;
 

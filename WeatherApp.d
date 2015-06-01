@@ -12,15 +12,15 @@ public class WeatherApp
 {
     /* URL used to get the public IP address of the user's system. */
     // private const ip_address_url = "http://ip.jsontest.com";
-    private const ip_address_url = "https://api.ipify.org/?format=json";
+    private enum ip_address_url = "https://api.ipify.org/?format=json";
 
     /* Stem of the URL used to retrieve the name of the user's current city. The public IP address
      * of the user's system needs to be appended to it to form the full required URL. */
-    private const city_name_url_stem = "http://getcitydetails.geobytes.com/GetCityDetails?fqcn=";
+    private enum city_name_url_stem = "http://getcitydetails.geobytes.com/GetCityDetails?fqcn=";
 
     /* Stem of the URL used to retrieve the weather information of the user's current city. The city
      * name needs to be appended to it to form the full required URL. */
-    private const weather_url_stem = "http://api.openweathermap.org/data/2.5/weather?q=";
+    private enum weather_url_stem = "http://api.openweathermap.org/data/2.5/weather?q=";
 
     /* Associative array containing the weather information of all cities
      * queried so far (indexed by city names). */
@@ -29,13 +29,14 @@ public class WeatherApp
     /* The main function that starts the weather application operations. */
     public void run ()
     {
-        string public_ip_addr;
+        // string public_ip_addr;
 
-        this.getPublicIpAddress(public_ip_addr);
+        // this.getPublicIpAddress(public_ip_addr);
 
         string city;
 
-        this.getCityName(public_ip_addr, city);
+        // this.getCityName(public_ip_addr, city);
+city = "Berlin";
 
         JSONValue weather_json;
 
