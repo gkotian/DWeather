@@ -29,14 +29,13 @@ public class WeatherApp
     /* The main function that starts the weather application operations. */
     public void run ()
     {
-        // string public_ip_addr;
+        string public_ip_addr;
 
-        // this.getPublicIpAddress(public_ip_addr);
+        this.getPublicIpAddress(public_ip_addr);
 
         string city;
 
-        // this.getCityName(public_ip_addr, city);
-city = "Berlin";
+        this.getCityName(public_ip_addr, city);
 
         JSONValue weather_json;
 
